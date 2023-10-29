@@ -1,5 +1,6 @@
 import streamlit as st
 import sqlite3
+import pandas as pd
 import time
 #st.set_page_config(layout="centered")
 conn = sqlite3.connect("user.db")
@@ -17,6 +18,7 @@ def task(user_id):
     TaskID INTEGER,
 	TaskName	TEXT NOT NULL,
 	TaskStatus	TEXT NOT NULL,
+	DateLimit TEXT,
     PRIMARY KEY(TaskID AUTOINCREMENT)
     ); """
     cursor.execute(query)
@@ -34,9 +36,9 @@ def get_tasks(user_id):
     cursor.execute(query)
     return cursor.fetchall()
 
-def add_task(user_id,taskname):
-    query = "INSERT INTO "+"a"+str(user_id)+" (TaskName,TaskStatus) VALUES (?,'Not Done')"
-    values = (taskname,)
+def add_task(user_id,taskname,date):
+    query = "INSERT INTO "+"a"+str(user_id)+" (TaskName,TaskStatus,DateLimit) VALUES (?,'Not Done',?)"
+    values = (taskname,date)
     cursor.execute(query, values)
     conn.commit()
 def u_task(user_id,tid,taskstatus):
@@ -85,22 +87,24 @@ if "user_id" in st.session_state:
             st.progress(var)
             if var<50:
                 st.subheader("Plant the seeds of today, for a harvest of success tomorrow. Your future is created by what you do today, not tomorrow.")
-            st.write('''Progress is the lifeblood of our journey towards success and fulfillment. It's the force that propels us forward, pushing boundaries and unlocking our true potential. Without progress, we remain stagnant, confined to the familiar and never experiencing the exhilaration of breaking new ground. Each step towards progress is a testament to our resilience, determination, and belief in our own capabilities. It fuels our confidence, showing us that we are capable of conquering challenges and achieving even greater heights. Progress is the beacon that lights the path to our dreams, reminding us that with each effort, we inch closer to realizing our aspirations. Embrace progress, for it is the transformative engine that turns dreams into reality and ordinary individuals into extraordinary achievers. Remember, every small step forward is a victory, and collectively, they form the staircase to our highest aspirations. So, let progress be your constant companion on this remarkable journey of self-discovery and accomplishment.''')
+            st.write('''Progress is the lifeblood of our journey towards success and fulfillment. It's the force that propels us forward, pushing boundaries and unlocking our true potential. Without progress, we remain stagnant, confined to the familiar and never experiencing the exhilaration of breaking new ground. ''')
+
 
 
         elif selected_operation == "Tasklist":
             st.subheader("Tasklist")
             task(st.session_state.user_id)
             taska = st.text_input("Taskname")
+            user_date = st.date_input("Select Deadline")
             if st.button("Add"):
-                add_task(st.session_state.user_id,taska)
+                add_task(st.session_state.user_id,taska,user_date)
             tid= st.text_input("Task ID")
             status= st.selectbox("Status",("Done","Not Done"),index=None)
             if status :
                 u_task(st.session_state.user_id,tid,status)
             ch=get_tasks(st.session_state.user_id)
             for i in ch:
-                st.write(f"#{i[0]} - Task Name: {i[1]}, Task Status: {i[2]}")
+                st.write(f"#{i[0]} - Task Name: {i[1]}, Task Status: {i[2]}, Deadline : {i[3]}")
         elif selected_operation == "Productivity":
             st.subheader("Are you productive Enough??")
             st.write('''Productivity is the cornerstone of efficiency and progress in both personal and professional realms. It encompasses the ability to prioritize tasks, manage time effectively, and achieve desired outcomes with the least amount of resources. A productive individual or team can accomplish more in a given timeframe, leading to a greater sense of accomplishment and, often, improved quality of work. Employing effective organizational strategies, harnessing motivation, and leveraging appropriate tools and technology are key components in enhancing productivity.
